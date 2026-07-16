@@ -1,25 +1,20 @@
 from dotenv import load_dotenv
 load_dotenv()
+from langchain_core.runnables import RunnableSequence
 from langchain_mistralai import ChatMistralAI
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# prompt
-prompt=ChatPromptTemplate.from_template("Explain {topic} in simple words")
-
-# model
-model=ChatMistralAI(model="mistral-small-2603")
-
-# outputparser
+prompt1=PromptTemplate(
+    template='write a joke about {topic}',
+    input_variables=['topic']
+)
+model=ChatMistralAI()
 parser=StrOutputParser()
+prompt2=PromptTemplate(
+    template='Explain the following joke - {text}',
+    input_variables=['text']
+)
+chain=RunnableSequence(prompt1,model,parser, prompt2, model, parser)
 
-# formatted_prompt=prompt.format_messages(topic="Machine Learning")
-
-# response=model.invoke(formatted_prompt)
-
-# result=parser.invoke(response.content)
-
-chain=prompt | model | parser
-
-result=chain.invoke("machine learning")
-print(result)
+print(chain.invoke({'topic':'AI'}))
